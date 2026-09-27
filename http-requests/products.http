@@ -1,0 +1,71 @@
+### Виберіть оточення (node або go) у випадаючому списку зверху цього файлу.
+### Запити виконуються кнопкою ▶ біля кожного "###".
+
+### 1. Health check
+GET {{host}}/health
+
+### 2. Список усіх товарів
+GET {{host}}/products
+
+### 3. Фільтр за категорією
+GET {{host}}/products?category=Laptops
+
+### 4. Створити товар (id зберігається у змінну productId)
+POST {{host}}/products
+Content-Type: application/json
+
+{
+  "name": "MacBook Air 13\"",
+  "category": "Laptops",
+  "brand": "Apple",
+  "price": 44999.5,
+  "stock": 3,
+  "description": "M3, 16GB, 512GB"
+}
+
+> {% client.global.set("productId", response.body.id); %}
+
+### 5. Отримати створений товар
+GET {{host}}/products/{{productId}}
+
+### 6. Оновити товар (PUT — повна заміна)
+PUT {{host}}/products/{{productId}}
+Content-Type: application/json
+
+{
+  "name": "MacBook Air 13\"",
+  "category": "Laptops",
+  "brand": "Apple",
+  "price": 39999,
+  "stock": 10,
+  "description": "M3, 16GB, 512GB — знижка"
+}
+
+### 7. Видалити товар (очікується 204)
+DELETE {{host}}/products/{{productId}}
+
+### --- Негативні сценарії ---
+
+### 8. Невалідне тіло -> 400
+POST {{host}}/products
+Content-Type: application/json
+
+{ "name": "", "price": -1 }
+
+### 9. Зламаний JSON -> 400
+POST {{host}}/products
+Content-Type: application/json
+
+{ broken
+
+### 10. Неіснуючий товар -> 404
+GET {{host}}/products/999999
+
+### 11. Некоректний id -> 400
+GET {{host}}/products/abc
+
+### 12. Непідтримуваний метод -> 405
+PATCH {{host}}/products
+
+### 13. Неіснуючий маршрут -> 404
+GET {{host}}/unknown
