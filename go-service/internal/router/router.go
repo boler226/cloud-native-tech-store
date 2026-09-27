@@ -9,7 +9,7 @@ import (
 	"tech-store-go/internal/middleware"
 )
 
-func New(health *handler.HealthHandler, products *handler.ProductHandler) http.Handler {
+func New(health *handler.HealthHandler, products *handler.ProductHandler, concurrency *handler.ConcurrencyHandler) http.Handler {
 	mux := http.NewServeMux()
 
 	// Go 1.22+: метод і параметри шляху вказуються прямо у патерні.
@@ -21,10 +21,18 @@ func New(health *handler.HealthHandler, products *handler.ProductHandler) http.H
 	mux.HandleFunc("PUT /products/{id}", products.Update)
 	mux.HandleFunc("DELETE /products/{id}", products.Delete)
 
+	// Лабораторна 2: дослідження моделей конкурентності.
+	mux.HandleFunc("GET /io", concurrency.IO)
+	mux.HandleFunc("GET /cpu/sequential", concurrency.CPUSequential)
+	mux.HandleFunc("GET /cpu/parallel", concurrency.CPUParallel)
+
 	// Патерни без методу спрацьовують, коли шлях існує, а метод — ні (405).
 	mux.HandleFunc("/health", methodNotAllowed("GET"))
 	mux.HandleFunc("/products", methodNotAllowed("GET", "POST"))
 	mux.HandleFunc("/products/{id}", methodNotAllowed("GET", "PUT", "DELETE"))
+	mux.HandleFunc("/io", methodNotAllowed("GET"))
+	mux.HandleFunc("/cpu/sequential", methodNotAllowed("GET"))
+	mux.HandleFunc("/cpu/parallel", methodNotAllowed("GET"))
 
 	// Усе інше — 404 у форматі JSON.
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

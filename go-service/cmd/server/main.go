@@ -21,13 +21,18 @@ import (
 func main() {
 	cfg := config.Load()
 
-	// Збирається
+	// Збираємо застосунок: repository -> service -> handler -> router.
 	repo := repository.NewMemoryProductRepository(seed.Products())
 	productService := service.NewProductService(repo)
+	concurrencyService := service.NewConcurrencyService()
 
 	srv := &http.Server{
-		Addr:              ":" + cfg.Port,
-		Handler:           router.New(handler.NewHealthHandler(), handler.NewProductHandler(productService)),
+		Addr: ":" + cfg.Port,
+		Handler: router.New(
+			handler.NewHealthHandler(),
+			handler.NewProductHandler(productService),
+			handler.NewConcurrencyHandler(concurrencyService),
+		),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
