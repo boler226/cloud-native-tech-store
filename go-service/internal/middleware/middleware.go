@@ -19,13 +19,15 @@ func (r *statusRecorder) WriteHeader(code int) {
 	r.ResponseWriter.WriteHeader(code)
 }
 
-// Logging виводить метод, шлях, статус і час обробки кожного запиту.
+// Logging — Middleware №1: виводить метод, шлях, статус і тривалість кожного запиту.
+// Формат: "GET /api/users/10 200 4.2ms".
 func Logging(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		rec := &statusRecorder{ResponseWriter: w, status: http.StatusOK}
 		next.ServeHTTP(rec, r)
-		log.Printf("%s %s -> %d (%s)", r.Method, r.URL.RequestURI(), rec.status, time.Since(start).Round(10*time.Microsecond))
+		ms := float64(time.Since(start).Microseconds()) / 1000
+		log.Printf("%s %s %d %.1fms", r.Method, r.URL.RequestURI(), rec.status, ms)
 	})
 }
 

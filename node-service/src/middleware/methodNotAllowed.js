@@ -1,5 +1,6 @@
-// 405 Method Not Allowed із заголовком Allow.
-module.exports = (allowed) => (req, res) => {
-  res.set('Allow', allowed.join(', '));
-  res.status(405).json({ error: 'Method not allowed' });
+const { MethodNotAllowedError } = require('../errors/app-errors');
+
+// 405 Method Not Allowed. Заголовок Allow виставляє центральний errorHandler.
+module.exports = (allowed) => (req, res, next) => {
+  next(new MethodNotAllowedError(allowed));
 };

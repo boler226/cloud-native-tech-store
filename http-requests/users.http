@@ -1,0 +1,80 @@
+### Лабораторна 4. Виберіть оточення (node або go) у випадаючому списку зверху цього файлу.
+
+### 1. Health check
+GET {{host}}/health
+
+### 2. Список користувачів (одразу є 2 початкових)
+GET {{host}}/api/users
+
+### 3. Створити користувача (id зберігається у змінну userId)
+POST {{host}}/api/users
+Content-Type: application/json
+
+{
+  "name": "Ann Smith",
+  "email": "ann@example.com"
+}
+
+> {% client.global.set("userId", response.body.id); %}
+
+### 4. Отримати створеного користувача
+GET {{host}}/api/users/{{userId}}
+
+### 5. Оновити користувача (PUT)
+PUT {{host}}/api/users/{{userId}}
+Content-Type: application/json
+
+{
+  "name": "Ann Johnson",
+  "email": "ann.johnson@example.com"
+}
+
+### 6. Видалити користувача (очікується 204)
+DELETE {{host}}/api/users/{{userId}}
+
+### 7. Той самий id після видалення -> 404 user_not_found
+GET {{host}}/api/users/{{userId}}
+
+### ------ Негативні сценарії: кожен показує свій код помилки ------
+
+### 8. Порожні/відсутні поля -> 400 validation_failed (details по кожному полю)
+POST {{host}}/api/users
+Content-Type: application/json
+
+{}
+
+### 9. Неправильні типи й формат email -> 400 validation_failed
+POST {{host}}/api/users
+Content-Type: application/json
+
+{ "name": 123, "email": "not-an-email" }
+
+### 10. Зламаний JSON -> 400 invalid_json
+POST {{host}}/api/users
+Content-Type: application/json
+
+{ "name": "oops"
+
+### 11. Некоректний id -> 400 invalid_id
+GET {{host}}/api/users/abc
+
+### 12. Неіснуючий користувач -> 404 user_not_found
+GET {{host}}/api/users/42
+
+### 13. Дублікат email -> 409 email_already_exists (john@example.com уже є в початкових даних)
+POST {{host}}/api/users
+Content-Type: application/json
+
+{ "name": "Another John", "email": "JOHN@example.com" }
+
+### 14. Не JSON -> 415 unsupported_media_type
+POST {{host}}/api/users
+Content-Type: text/plain
+
+name=John
+
+### 15. Непідтримуваний метод -> 405 (+ заголовок Allow)
+PATCH {{host}}/api/users
+
+### 16. Невідомий маршрут -> 404 route_not_found
+GET {{host}}/api/unknown
