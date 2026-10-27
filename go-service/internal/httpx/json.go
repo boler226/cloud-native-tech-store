@@ -7,11 +7,6 @@ import (
 	"net/http"
 )
 
-type errorBody struct {
-	Error   string   `json:"error"`
-	Details []string `json:"details,omitempty"`
-}
-
 // WriteJSON серіалізує v у JSON і відправляє з потрібним статусом.
 func WriteJSON(w http.ResponseWriter, status int, v any) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -23,7 +18,16 @@ func WriteJSON(w http.ResponseWriter, status int, v any) {
 	}
 }
 
-// WriteError відправляє помилку у єдиному форматі {"error": "...", "details": [...]}.
+// WriteError відправляє помилку у єдиному форматі {"error": "<код>", "message": "...", "details": [...]}.
+// Код визначається за статусом (400 з details -> "validation_failed"). Використовується
+// обробниками, що не повертають error (products, concurrency, router fallback-и).
 func WriteError(w http.ResponseWriter, status int, message string, details ...string) {
-	WriteJSON(w, status, errorBody{Error: message, Details: details})
+	body := ErrorBody{Error: CodeForStatus(status), Message: message}
+	if len(details) > 0 {
+		body.Details = details
+		if status == http.StatusBadRequest {
+			body.Error = "validation_failed"
+		}
+	}
+	WriteJSON(w, status, body)
 }

@@ -10,29 +10,16 @@ import (
 	"syscall"
 	"time"
 
+	"tech-store-go/internal/app"
 	"tech-store-go/internal/config"
-	"tech-store-go/internal/handler"
-	"tech-store-go/internal/repository"
-	"tech-store-go/internal/router"
-	"tech-store-go/internal/seed"
-	"tech-store-go/internal/service"
 )
 
 func main() {
 	cfg := config.Load()
 
-	// Збираємо застосунок: repository -> service -> handler -> router.
-	repo := repository.NewMemoryProductRepository(seed.Products())
-	productService := service.NewProductService(repo)
-	concurrencyService := service.NewConcurrencyService()
-
 	srv := &http.Server{
-		Addr: ":" + cfg.Port,
-		Handler: router.New(
-			handler.NewHealthHandler(),
-			handler.NewProductHandler(productService),
-			handler.NewConcurrencyHandler(concurrencyService),
-		),
+		Addr:              ":" + cfg.Port,
+		Handler:           app.New(app.Options{}), // збирання залежностей — у composition root
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
