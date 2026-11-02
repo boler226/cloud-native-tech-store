@@ -2,3 +2,6 @@ node_modules/
 .idea/
 *.log
 *.exe
+storage/
+*.csv
+result.csv

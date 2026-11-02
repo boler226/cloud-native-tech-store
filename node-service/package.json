@@ -1,18 +1,21 @@
 {
   "name": "tech-store-node",
   "version": "1.0.0",
-  "description": "Лабораторна робота 1: HTTP CRUD-сервіс інтернет-магазину техніки (Node.js + Express, in-memory storage)",
+  "description": "Лабораторні роботи 1-5: HTTP-сервіс інтернет-магазину техніки (Node.js + Express), streams, backpressure, WebSockets",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "test": "node --test"
+    "test": "node --test",
+    "gen:data": "node scripts/generate-data.js",
+    "demo:backpressure": "node scripts/backpressure-demo.js"
   },
   "engines": {
     "node": ">=18"
   },
   "license": "ISC",
   "dependencies": {
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "ws": "^8.18.0"
   }
 }
